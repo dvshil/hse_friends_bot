@@ -9,7 +9,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from aiogram import Bot, Dispatcher, F
 from app.handlers import router
 
-SyncORM.create_tables()
+# SyncORM.create_tables()
 
 async def main():
 
