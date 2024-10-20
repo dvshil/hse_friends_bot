@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
-from app.database.orm import SyncORM
+from app.database.orm import SyncORM, AsyncORM
 
 import app.keyboards as kb
 
@@ -87,3 +87,20 @@ async def register_contact(message: Message, state: FSMContext):
 async def register_photo(message: Message, state: FSMContext):
     await state.update_data(photo_id=message.photo[-1].file_id)
     await message.answer('Фото загружено')
+    data = await state.get_data()
+
+    curr = await AsyncORM.insert_users(str(data["contact"]))
+    pk = curr[0].model_dump()
+
+    await AsyncORM.insert_profiles(str(data["name"]), int(data["age"]), str(data["birthday"]), str(data["zodiac"]),
+                                   str(data["group"]),
+                                   str(data["hobbies"]), str(data["contact"]), str(data["photo_id"]), int(pk["id"]))
+    await message.answer_photo(photo=data["photo_id"], caption=f'{data["name"]}, '
+                                                               f'{data["age"]} лет\n{data["birthday"]}, {data["zodiac"]}\n'
+                                                               f'{data["hobbies"]}\n'
+                                                               f'{data["group"]}\n{data["contact"]}')
+
+    await state.clear()
+
+    await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
+                         '4.Изменить текст анкеты.', reply_markup=kb.action)
