@@ -92,6 +92,15 @@ async def register_photo(message: Message, state: FSMContext):
     curr = await AsyncORM.insert_users(str(data["contact"]))
     pk = curr[0].model_dump()
 
-
+    await AsyncORM.insert_profiles(str(data["name"]), int(data["age"]), str(data["birthday"]), str(data["zodiac"]),
+                                   str(data["group"]),
+                                   str(data["hobbies"]), str(data["contact"]), str(data["photo_id"]), int(pk["id"]))
+    await message.answer_photo(photo=data["photo_id"], caption=f'{data["name"]}, '
+                                                               f'{data["age"]} лет\n{data["birthday"]}, {data["zodiac"]}\n'
+                                                               f'{data["hobbies"]}\n'
+                                                               f'{data["group"]}\n{data["contact"]}')
 
     await state.clear()
+
+    await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
+                         '4.Изменить текст анкеты.', reply_markup=kb.action)

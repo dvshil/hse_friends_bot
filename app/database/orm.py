@@ -1,4 +1,3 @@
-
 from sqlalchemy import text, insert, select, inspect, and_, func, cast, Integer, or_
 
 from app.database.database_f import sync_engine, async_engine, session_factory, async_session_factory
@@ -40,3 +39,16 @@ class AsyncORM:
             result_dto = [UsersDTO.model_validate(row, from_attributes=True) for row in result_orm]
             print(f"{result_dto=}")
             return result_dto
+
+    @staticmethod
+    async def insert_profiles(name: str, age: int, birthday: str, zodiac: str, group: str, hobbies: str, contact: str,
+                              photo_id: str, user_id: int):
+        async with async_session_factory() as session:
+            profile1 = UserProfile(name=name, age=age, birthday=birthday, zodiac=zodiac, group=group,
+                                   hobbies=hobbies, contact=contact, photo_id=photo_id, user_id=user_id)
+            # profile2 = UserProfile(id=39, name="", age=, ="",
+            #                              group="", hobbies="",
+            #                              contact="@", user_id=)
+
+            session.add_all([profile1])
+            await session.commit()
