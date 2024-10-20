@@ -30,6 +30,32 @@ async def cmd_start(message: Message):
     await message.answer('Я помогу найти тебе друзей😇', reply_markup=kb.start_1)
 
 
+@router.message(F.text == 'Моя анкета')
+async def output_profile(message: Message):
+    data = await AsyncORM.send_user_profile(str(f"@{message.chat.username}"))
+    if data:
+        user_dto = data[0].model_dump()
+        await message.answer_photo(photo=user_dto["photo_id"], caption=f'{user_dto["name"]}, '
+                                                                       f'{user_dto["age"]} лет\n{user_dto["birthday"]}\n{user_dto["hobbies"]}\n'
+                                                                       f'{user_dto["group"]}\n{user_dto["contact"]}')
+        await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
+                             '4.Изменить текст анкеты.', reply_markup=kb.action)
+    else:
+        await message.answer('Вы еще не добавляли свою анкету. Предлагаю это исправить ;)',
+                             reply_markup=kb.regg)
+
+
+@router.message(F.text == 'Давай начнем😜')
+async def output_or_fill(message: Message):
+    await message.answer('Предлагаю посмотреть твою анкету или заполнить, если её еще нет :)',
+                         reply_markup=kb.start_2)
+
+
+@router.message(Command('myprofile'))
+async def my_profile(message: Message):
+    await output_profile(message)
+
+
 @router.message(F.text == 'Заполнить анкету')
 async def reg_start(message: Message, state: FSMContext):
     await state.set_state(Register.name)
@@ -92,6 +118,16 @@ async def register_photo(message: Message, state: FSMContext):
     curr = await AsyncORM.insert_users(str(data["contact"]))
     pk = curr[0].model_dump()
 
-
+    await AsyncORM.insert_profiles(str(data["name"]), int(data["age"]), str(data["birthday"]), str(data["zodiac"]),
+                                   str(data["group"]),
+                                   str(data["hobbies"]), str(data["contact"]), str(data["photo_id"]), int(pk["id"]))
+    await message.answer_photo(photo=data["photo_id"], caption=f'{data["name"]}, '
+                                                               f'{data["age"]} лет\n{data["birthday"]}, {data["zodiac"]}\n'
+                                                               f'{data["hobbies"]}\n'
+                                                               f'{data["group"]}\n{data["contact"]}')
 
     await state.clear()
+
+    await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
+                         '4.Изменить текст анкеты.', reply_markup=kb.action)
+
