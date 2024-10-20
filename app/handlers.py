@@ -90,5 +90,8 @@ async def register_photo(message: Message, state: FSMContext):
     data = await state.get_data()
 
     curr = await AsyncORM.insert_users(str(data["contact"]))
+    pk = curr[0].model_dump()
+
+
 
     await state.clear()

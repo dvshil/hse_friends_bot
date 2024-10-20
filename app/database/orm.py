@@ -3,7 +3,7 @@ from sqlalchemy import text, insert, select, inspect, and_, func, cast, Integer,
 
 from app.database.database_f import sync_engine, async_engine, session_factory, async_session_factory
 from app.database.models import User, Base, UserProfile
-
+from app.database.schemas import UsersDTO
 
 
 class SyncORM:
@@ -30,3 +30,13 @@ class AsyncORM:
 
             # await session.flush()
             await session.commit()
+            query = (
+                select(User)
+                .order_by(User.id.desc())
+                .limit(1)
+            )
+            result = await session.execute(query)
+            result_orm = result.scalars().all()
+            result_dto = [UsersDTO.model_validate(row, from_attributes=True) for row in result_orm]
+            print(f"{result_dto=}")
+            return result_dto
