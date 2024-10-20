@@ -1,3 +1,4 @@
+
 from sqlalchemy import text, insert, select, inspect, and_, func, cast, Integer, or_
 
 from app.database.database_f import sync_engine, async_engine, session_factory, async_session_factory
@@ -52,7 +53,7 @@ class AsyncORM:
 
             session.add_all([profile1])
             await session.commit()
-
+            
     @staticmethod
     async def send_user_profile(tg_id: str):
         async with async_session_factory() as session:
@@ -66,4 +67,3 @@ class AsyncORM:
             result_dto = [ProfilesDTO.model_validate(row, from_attributes=True) for row in result_orm]
             print(f"{result_dto=}")
             return result_dto
-

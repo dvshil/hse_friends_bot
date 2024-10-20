@@ -130,4 +130,3 @@ async def register_photo(message: Message, state: FSMContext):
 
     await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
                          '4.Изменить текст анкеты.', reply_markup=kb.action)
-
