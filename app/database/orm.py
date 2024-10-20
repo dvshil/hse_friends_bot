@@ -1,8 +1,9 @@
+
 from sqlalchemy import text, insert, select, inspect, and_, func, cast, Integer, or_
 
 from app.database.database_f import sync_engine, async_engine, session_factory, async_session_factory
 from app.database.models import User, Base, UserProfile
-from app.database.schemas import UsersDTO
+from app.database.schemas import UsersDTO, ProfilesDTO
 
 
 class SyncORM:
@@ -52,3 +53,17 @@ class AsyncORM:
 
             session.add_all([profile1])
             await session.commit()
+            
+    @staticmethod
+    async def send_user_profile(tg_id: str):
+        async with async_session_factory() as session:
+            query = (
+                select(UserProfile).where(UserProfile.contact.in_([f"{tg_id}"]))
+                # select(UserProfile).where(UserProfile.contact == tg_id)
+            )
+
+            res = await session.execute(query)
+            result_orm = res.scalars().all()
+            result_dto = [ProfilesDTO.model_validate(row, from_attributes=True) for row in result_orm]
+            print(f"{result_dto=}")
+            return result_dto
