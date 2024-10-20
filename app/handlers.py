@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
-from app.database.orm import SyncORM
+from app.database.orm import SyncORM, AsyncORM
 
 import app.keyboards as kb
 
@@ -87,3 +87,8 @@ async def register_contact(message: Message, state: FSMContext):
 async def register_photo(message: Message, state: FSMContext):
     await state.update_data(photo_id=message.photo[-1].file_id)
     await message.answer('Фото загружено')
+    data = await state.get_data()
+
+    curr = await AsyncORM.insert_users(str(data["contact"]))
+
+    await state.clear()
