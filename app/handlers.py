@@ -143,3 +143,69 @@ async def see_profiles(message: Message):
                                                             f'{user_dto["age"]} лет\n{user_dto["birthday"]}\n{user_dto["hobbies"]}\n'
                                                             f'{user_dto["group"]}\n{user_dto["contact"]}',
                                reply_markup=kb.profile_view)
+
+
+
+
+@router.message(F.text == '2')
+async def restart_reg(message: Message, state: FSMContext):
+    await AsyncORM.delete_profile(str(f"@{message.chat.username}"))
+    await reg_start(message, state)
+
+
+
+
+class UpdatePhoto(StatesGroup):
+    photo_id = State()
+
+@router.message(F.text == '3')
+async def edit_photo(message: Message, state: FSMContext):
+    await state.set_state(UpdatePhoto.photo_id)
+    # await AsyncORM.update_photo(str(f"@{message.chat.username}"), )
+    await message.answer('Теперь пришли фото')
+
+@router.message(UpdatePhoto.photo_id)
+async def upd_photo(message: Message, state: FSMContext):
+    await state.update_data(photo_id=message.photo[-1].file_id)
+    await message.answer('Фото загружено')
+    data = await state.get_data()
+    await AsyncORM.update_photo(str(f"@{message.chat.username}"), str(data["photo_id"]))
+
+    await state.clear()
+
+    await message.answer('Так выглядит твоя анкета:')
+    prof = await AsyncORM.send_user_profile(str(f"@{message.chat.username}"))
+    user_dto = prof[0].model_dump()
+    await message.answer_photo(photo=user_dto["photo_id"], caption=f'{user_dto["name"]}, '
+                                                                   f'{user_dto["age"]} лет\n{user_dto["birthday"]}\n{user_dto["hobbies"]}\n'
+                                                                   f'{user_dto["group"]}\n{user_dto["contact"]}')
+    await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
+                         '4.Изменить текст анкеты.', reply_markup=kb.action)
+
+
+
+
+class UpdateHobbies(StatesGroup):
+    hobbies = State()
+
+@router.message(F.text == '4')
+async def edit_hobbies(message: Message, state: FSMContext):
+    await state.set_state(UpdateHobbies.hobbies)
+    await message.answer('Расскажи о себе и кого хочешь найти')
+
+@router.message(UpdateHobbies.hobbies)
+async def upd_hobby(message: Message, state: FSMContext):
+    await state.update_data(hobbies=message.text)
+    await message.answer('Текст анкеты изменён')
+    data = await state.get_data()
+    await AsyncORM.update_hobby(str(f"@{message.chat.username}"), str(data["hobbies"]))
+    await state.clear()
+
+    await message.answer('Так выглядит твоя анкета:')
+    prof = await AsyncORM.send_user_profile(str(f"@{message.chat.username}"))
+    user_dto = prof[0].model_dump()
+    await message.answer_photo(photo=user_dto["photo_id"], caption=f'{user_dto["name"]}, '
+                                                                   f'{user_dto["age"]} лет\n{user_dto["birthday"]}\n{user_dto["hobbies"]}\n'
+                                                                   f'{user_dto["group"]}\n{user_dto["contact"]}')
+    await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
+                         '4.Изменить текст анкеты.', reply_markup=kb.action)

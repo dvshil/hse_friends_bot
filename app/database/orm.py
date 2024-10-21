@@ -1,5 +1,5 @@
 
-from sqlalchemy import text, insert, select, inspect, and_, func, cast, Integer, or_
+from sqlalchemy import text, insert, select, inspect, and_, func, cast, Integer, or_, delete, update
 
 from app.database.database_f import sync_engine, async_engine, session_factory, async_session_factory
 from app.database.models import User, Base, UserProfile
@@ -82,3 +82,35 @@ class AsyncORM:
             result_dto = [ProfilesDTO.model_validate(row, from_attributes=True) for row in result_orm]
             print(f"{result_dto=}")
             return result_dto
+
+    @staticmethod
+    async def delete_profile(tg_id: str):
+        async with async_session_factory() as session:
+            stmt = delete(User).where(User.tg_id == tg_id)
+            await session.execute(stmt)
+            await session.commit()
+
+    @staticmethod
+    async def update_photo(tg_id: str, photo_id: str):
+        async with async_session_factory() as session:
+            stmt = (
+                update(UserProfile).
+                where(UserProfile.contact == tg_id).
+                values(photo_id=photo_id)
+            )
+
+            await session.execute(stmt)
+            await session.commit()
+
+    @staticmethod
+    async def update_hobby(tg_id: str, hobbies: str):
+        async with async_session_factory() as session:
+            stmt = (
+                update(UserProfile)
+                .where(UserProfile.contact == tg_id)
+                .values(hobbies=hobbies)
+            )
+
+            await session.execute(stmt)
+            await session.commit()
+
