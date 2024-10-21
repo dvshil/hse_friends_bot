@@ -22,3 +22,9 @@ action = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='1'), KeyboardButton
 
 regg = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Заполнить анкету')]],
                            one_time_keyboard=True, resize_keyboard=True)
+
+profile_view = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='👍'),
+                                             KeyboardButton(text='✉️'),
+                                   KeyboardButton(text='👎'),
+                                              KeyboardButton(text='💤')]],
+                                   resize_keyboard=True)

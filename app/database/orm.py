@@ -53,13 +53,28 @@ class AsyncORM:
 
             session.add_all([profile1])
             await session.commit()
-            
+
     @staticmethod
     async def send_user_profile(tg_id: str):
         async with async_session_factory() as session:
             query = (
                 select(UserProfile).where(UserProfile.contact.in_([f"{tg_id}"]))
                 # select(UserProfile).where(UserProfile.contact == tg_id)
+            )
+
+            res = await session.execute(query)
+            result_orm = res.scalars().all()
+            result_dto = [ProfilesDTO.model_validate(row, from_attributes=True) for row in result_orm]
+            print(f"{result_dto=}")
+            return result_dto
+
+    @staticmethod
+    async def convert_users_to_dto():
+        async with async_session_factory() as session:
+            query = (
+                select(UserProfile)
+                .order_by(func.random())
+                .limit(1)
             )
 
             res = await session.execute(query)

@@ -8,6 +8,8 @@ from app.database.orm import SyncORM, AsyncORM
 
 import app.keyboards as kb
 
+
+
 router = Router()
 
 
@@ -130,3 +132,14 @@ async def register_photo(message: Message, state: FSMContext):
 
     await message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
                          '4.Изменить текст анкеты.', reply_markup=kb.action)
+
+
+@router.message(F.text.contains('1') | F.text.contains('👎'))
+async def see_profiles(message: Message):
+    data = await AsyncORM.convert_users_to_dto()
+    user_dto = data[0].model_dump()
+
+    await message.answer_photo(photo=user_dto["photo_id"], caption=f'{user_dto["name"]}, '
+                                                            f'{user_dto["age"]} лет\n{user_dto["birthday"]}\n{user_dto["hobbies"]}\n'
+                                                            f'{user_dto["group"]}\n{user_dto["contact"]}',
+                               reply_markup=kb.profile_view)
