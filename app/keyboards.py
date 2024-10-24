@@ -28,3 +28,11 @@ profile_view = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='👍'),
                                    KeyboardButton(text='👎'),
                                               KeyboardButton(text='💤')]],
                                    resize_keyboard=True)
+
+show_user = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Да', callback_data='Да'), InlineKeyboardButton(text='Нет', callback_data='Нет')]
+])
+
+next_user = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Следующая анкета', callback_data='Да')]
+])

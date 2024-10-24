@@ -2,7 +2,7 @@
 import datetime
 from typing import Optional, Annotated
 
-from sqlalchemy import String, MetaData, ForeignKey, func, text
+from sqlalchemy import String, ForeignKey, func, text, BigInteger
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database.database_f import Base, str_200
@@ -17,13 +17,6 @@ updated_at = Annotated[datetime.datetime, mapped_column(server_default=text("TIM
 
 
 
-class User(Base):
-    __tablename__ = 'users'
-
-    id: Mapped[intpk]
-    tg_id: Mapped[str]
-
-
 class UserProfile(Base):
     __tablename__ = 'profiles'
 
@@ -36,6 +29,14 @@ class UserProfile(Base):
     hobbies: Mapped[str] = mapped_column(String(350))
     contact: Mapped[str_200]
     photo_id: Mapped[str_200]
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    user_id = mapped_column(BigInteger)
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
+
+
+class UserLikes(Base):
+    __tablename__ = 'likes'
+
+    id: Mapped[intpk]
+    like_id = mapped_column(BigInteger)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"))

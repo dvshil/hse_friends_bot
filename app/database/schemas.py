@@ -28,6 +28,15 @@ class ProfilesDTO(ProfilesAddDTO):
     created_at: datetime
     updated_at: datetime
 
+
+class LikesAddDTO(BaseModel):
+    like_id: int
+    profile_id: int
+
+class LikesDTO(LikesAddDTO):
+    id: int
+
+
 class ProfilesRelDTO(ProfilesDTO):
     user: "UsersDTO"
 

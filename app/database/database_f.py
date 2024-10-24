@@ -5,8 +5,8 @@ from sqlalchemy import URL, create_engine, text, String
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import Session, sessionmaker, DeclarativeBase
 
-DATABASE_URL_asyncpg = "postgresql+asyncpg://postgres:hsefriends76@localhost/practicedb"
-DATABASE_URL_psycopg = "postgresql+psycopg://postgres:hsefriends76@localhost/practicedb"
+DATABASE_URL_asyncpg = "postgresql+asyncpg://postgres:hsefriends76@localhost/postgres"
+DATABASE_URL_psycopg = "postgresql+psycopg://postgres:hsefriends76@localhost/postgres"
 
 
 sync_engine = create_engine(url=DATABASE_URL_psycopg,
