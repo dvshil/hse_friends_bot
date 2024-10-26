@@ -24,7 +24,7 @@ regg = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Заполнить а
                            one_time_keyboard=True, resize_keyboard=True)
 
 profile_view = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='👍'),
-                                             KeyboardButton(text='✉️'),
+                                             KeyboardButton(text='💌'),
                                    KeyboardButton(text='👎'),
                                               KeyboardButton(text='💤')]],
                                    resize_keyboard=True)
@@ -36,3 +36,5 @@ show_user = InlineKeyboardMarkup(inline_keyboard=[
 next_user = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Следующая анкета', callback_data='Да')]
 ])
+
+sleep_mode = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='1')]], resize_keyboard=True)

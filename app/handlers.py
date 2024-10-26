@@ -194,33 +194,69 @@ async def no(callback: CallbackQuery):
     pk_dto = get_pk[0].model_dump()
     pk = pk_dto["id"]
     await AsyncORM.remove_all_likes(int(pk))
-    await callback.message.answer('aight')
+    await callback.message.answer('')
     await callback.message.answer('1. Смотреть анкеты.\n2. Заполнить анкету заново.\n3. Изменить фото/видео.\n'
                                   '4.Изменить текст анкеты.', reply_markup=kb.action)
 
 
 
-@router.message(F.text.contains('1') | F.text.contains('👎') | F.text.contains('👍'))
-async def see_profiles(message: Message, state: FSMContext, bot: Bot):
-    data = await AsyncORM.convert_users_to_dto(int(message.chat.id)) #start sending profiles
-    user_dto = data[0].model_dump()
+@router.message(F.text.contains('1') | F.text.contains('👎') | F.text.contains('👍') | F.text.contains('💌'))
+async def see_profiles(message: Message, bot: Bot):
+
     if message.text == '👍':
-        await bot.send_message(user_dto["user_id"],
+
+        pk = await AsyncORM.getting_pk_by_like_id(int(message.chat.id))
+        pk_dto = pk[0].model_dump()
+
+        user_id = await AsyncORM.getting_user_id_by_pk(int(pk_dto["profile_id"]))
+        user_past_dto = user_id[0].model_dump()
+
+        await bot.send_message(user_past_dto["user_id"],
                                'Вы понравились одному человеку, хотите посмотреть его анкету?',
                                reply_markup=kb.show_user)
 
-        await AsyncORM.insert_likes(int(message.chat.id), int(user_dto["id"]))
 
-    else:
-        pass
 
+    # elif message.text == '💌':
+    #     pk = await AsyncORM.getting_pk_by_like_id(int(message.chat.id))
+    #     pk_dto = pk[0].model_dump()
+    #
+    #     user_id = await AsyncORM.getting_user_id_by_pk(int(pk_dto["profile_id"]))
+    #     user_past_dto = user_id[0].model_dump()
+    #
+    #     await bot.send_message(user_past_dto["user_id"],
+    #                            '',
+    #                            reply_markup=kb.show_user)
+
+
+
+
+    elif message.text == '👎':
+        try:
+            # # удалить пред запись в лайкс
+            pk = await AsyncORM.getting_pk_by_like_id(int(message.chat.id))
+            pk_dto = pk[0].model_dump()
+
+            await AsyncORM.delete_last_note_in_likes(int(message.chat.id), int(pk_dto["profile_id"]))
+        except IndexError:
+
+            pass
+
+
+
+    data = await AsyncORM.convert_users_to_dto(int(message.chat.id))  # start sending profiles
+    user_dto = data[0].model_dump()
+    await AsyncORM.insert_likes(int(message.chat.id), int(user_dto["id"]))
 
     await message.answer_photo(photo=user_dto["photo_id"], caption=f'{user_dto["name"]}, '
                                                             f'{user_dto["age"]} лет\n{user_dto["birthday"]}\n{user_dto["hobbies"]}\n'
                                                             f'{user_dto["group"]}',
                                reply_markup=kb.profile_view)
 
-
+@router.message(F.text.in_(['💤']))
+async def sleepy(message: Message):
+    await message.answer('Подождем пока кто-нибудь увидит твою анкету ;)')
+    await message.answer('1. Смотреть анкеты.', reply_markup=kb.sleep_mode)
 
 
 @router.message(F.text == '2')
@@ -245,7 +281,7 @@ async def upd_photo(message: Message, state: FSMContext):
     await state.update_data(photo_id=message.photo[-1].file_id)
     await message.answer('Фото загружено')
     data = await state.get_data()
-    await AsyncORM.update_photo(str(f"@{message.chat.username}"), str(data["photo_id"]))
+    await AsyncORM.update_photo(int(message.chat.id), str(data["photo_id"]))
 
     await state.clear()
 
@@ -276,7 +312,7 @@ async def upd_hobby(message: Message, state: FSMContext):
     await state.update_data(hobbies=message.text)
     await message.answer('Текст анкеты изменён')
     data = await state.get_data()
-    await AsyncORM.update_hobby(str(f"@{message.chat.username}"), str(data["hobbies"]))
+    await AsyncORM.update_hobby(int(message.chat.id), str(data["hobbies"]))
     await state.clear()
 
     await message.answer('Так выглядит твоя анкета:')

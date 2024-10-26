@@ -2,7 +2,7 @@ import asyncio
 import os
 import sys
 
-from app.database.orm import SyncORM
+from app.database.orm import SyncORM, AsyncORM
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
@@ -13,7 +13,7 @@ from app.handlers import router
 
 async def main():
 
-    bot = Bot(token='7126231479:AAHILyOiKMIHEBN58Dq7IXViiXXUf4r0q-E')
+    bot = Bot(token='7880670860:AAH3cRMCw_pDbNu1RcDKRPiDvTIEWsAgUj8')
     dp = Dispatcher()
     dp.include_router(router)
     await dp.start_polling(bot)

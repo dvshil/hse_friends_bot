@@ -39,6 +39,17 @@ class AsyncORM:
             await session.commit()
 
     @staticmethod
+    async def insert_user_id(usr_id: int, contact: str):
+        async with async_session_factory() as session:
+            stmt = (
+                update(UserProfile).
+                where(UserProfile.contact == contact).
+                values(user_id=usr_id)
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    @staticmethod
     async def delete_profile(user_id: int):
         async with async_session_factory() as session:
             stmt = delete(UserProfile).where(UserProfile.user_id == user_id)
@@ -139,6 +150,51 @@ class AsyncORM:
             await session.commit()
 
     @staticmethod
+    async def getting_pk_by_like_id(like_id: int):
+        async with async_session_factory() as session:
+            async_engine.echo = True
+            query = (
+                select(UserLikes)
+                .where(UserLikes.like_id == like_id)
+                .order_by(UserLikes.like_id.desc())
+                .limit(1)
+
+            )
+
+            res = await session.execute(query)
+            result_orm = res.scalars().all()
+
+            result_dto = [LikesDTO.model_validate(row, from_attributes=True) for row in result_orm]
+            print(f"{result_dto=}")
+            return result_dto
+
+    @staticmethod
+    async def delete_last_note_in_likes(like_id: int, pk: int):
+        async with async_session_factory() as session:
+            stmt = (
+                delete(UserLikes)
+                .where(UserLikes.like_id == like_id
+                       and UserLikes.profile_id == pk)
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    @staticmethod
+    async def getting_user_id_by_pk(pk: int):
+        async with async_session_factory() as session:
+            query = (
+                select(UserProfile)
+                .where(UserProfile.id == pk)
+            )
+
+            res = await session.execute(query)
+            result_orm = res.scalars().all()
+
+            result_dto = [ProfilesDTO.model_validate(row, from_attributes=True) for row in result_orm]
+            print(f"{result_dto}")
+            return result_dto
+
+    @staticmethod
     async def insert_likes(like_id: int, pk: int):
         async with async_session_factory() as session:
             like_1 = UserLikes(like_id=like_id, profile_id=pk)
@@ -156,11 +212,11 @@ class AsyncORM:
     #         await session.commit()
 
     @staticmethod
-    async def update_photo(tg_id: str, photo_id: str):
+    async def update_photo(user_id: int, photo_id: str):
         async with async_session_factory() as session:
             stmt = (
                 update(UserProfile).
-                where(UserProfile.contact == tg_id).
+                where(UserProfile.user_id == user_id).
                 values(photo_id=photo_id)
             )
 
@@ -168,11 +224,11 @@ class AsyncORM:
             await session.commit()
 
     @staticmethod
-    async def update_hobby(tg_id: str, hobbies: str):
+    async def update_hobby(user_id: int, hobbies: str):
         async with async_session_factory() as session:
             stmt = (
                 update(UserProfile)
-                .where(UserProfile.contact == tg_id)
+                .where(UserProfile.user_id == user_id)
                 .values(hobbies=hobbies)
             )
 
